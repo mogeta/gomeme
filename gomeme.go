@@ -61,8 +61,11 @@ func NewClient(meme Gomeme, token *oauth2.Token) memeClient {
 
 func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
 	v := url.Values{}
-	v.Add("access_token", c.Token.AccessToken)
-	v.Add("action", "getactivity")
+	v.Add("date_from", from.Format(time.RFC3339))
+	v.Add("date_to", from.Format(time.RFC3339))
+	if cursor != "" {
+		v.Add("cursor", cursor)
+	}
 
 	path := fmt.Sprintf("%s?%s", "https://apis.jins.com/meme/v1/users/me/office2/computed_data", v.Encode())
 	req, _ := http.NewRequest("GET", path, nil)
