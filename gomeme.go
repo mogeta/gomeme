@@ -64,9 +64,9 @@ func NewClient(meme Gomeme, token *oauth2.Token) memeClient {
 	}
 }
 
-func (c memeClient) GetEvents() {
+func (c memeClient) GetEvents(from, to time.Time) {
 	v := url.Values{}
-	v.Add("type", "computed_data")
+	v.Add("type", "summary_data")
 
 	path := fmt.Sprintf("%s?%s", "https://apis.jins.com/meme/v1/users/me/office2/events", v.Encode())
 	req, _ := http.NewRequest("GET", path, nil)
@@ -88,12 +88,13 @@ func (c memeClient) GetEvents() {
 func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
 	v := url.Values{}
 	v.Add("date_from", from.Format(time.RFC3339))
-	v.Add("date_to", from.Format(time.RFC3339))
+	v.Add("date_to", to.Format(time.RFC3339))
 	if cursor != "" {
 		v.Add("cursor", cursor)
 	}
 
 	path := fmt.Sprintf("%s?%s", "https://apis.jins.com/meme/v1/users/me/office2/computed_data", v.Encode())
+	fmt.Println(path)
 	req, _ := http.NewRequest("GET", path, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token.AccessToken))
 	req.Header.Set("Accept", "application/json")
@@ -107,6 +108,7 @@ func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
 	}
 	fmt.Println("result")
 	spew.Dump(body)
+	fmt.Println(string(body))
 }
 
 func (c memeClient) GetSummary(from, to time.Time) (Summaries, error) {
