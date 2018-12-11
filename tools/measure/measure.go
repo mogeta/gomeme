@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 	"gomeme"
@@ -32,12 +33,24 @@ func main() {
 	start, end := createOneDay(t)
 	//client.GetMeasutreData(start, end, "")
 	//client.GetEvents(start, end)
-	client.GetMeasutreData(start, end, "")
-	//summary, err := client.GetSummary(start, end)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//spew.Dump(summary)
+
+	var cursor = ""
+	var computedData []gomeme.ComputedDatum
+	for {
+		measure, err := client.GetMeasutreData(start, end, cursor)
+		for key := range measure.ComputedData {
+			computedData = append(computedData, measure.ComputedData[key]...)
+		}
+		if err != nil {
+			log.Fatal(err)
+			break
+		}
+		if measure.Cursor == "" {
+			break
+		}
+		cursor = measure.Cursor
+	}
+	spew.Dump(computedData)
 }
 
 func createOneDay(t time.Time) (begin, end time.Time) {

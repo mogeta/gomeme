@@ -85,7 +85,7 @@ func (c memeClient) GetEvents(from, to time.Time) {
 	fmt.Println(string(body))
 }
 
-func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
+func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) (Measure, error) {
 	v := url.Values{}
 	v.Add("date_from", from.Format(time.RFC3339))
 	v.Add("date_to", to.Format(time.RFC3339))
@@ -94,7 +94,6 @@ func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
 	}
 
 	path := fmt.Sprintf("%s?%s", "https://apis.jins.com/meme/v1/users/me/office2/computed_data", v.Encode())
-	fmt.Println(path)
 	req, _ := http.NewRequest("GET", path, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token.AccessToken))
 	req.Header.Set("Accept", "application/json")
@@ -106,9 +105,11 @@ func (c memeClient) GetMeasutreData(from, to time.Time, cursor string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("result")
-	spew.Dump(body)
-	fmt.Println(string(body))
+
+	var m Measure
+	err = json.Unmarshal(body, &m)
+	return m, err
+
 }
 
 func (c memeClient) GetSummary(from, to time.Time) (Summaries, error) {
